@@ -19,65 +19,105 @@ var curve = new THREE.CubicBezierCurve3(
 );
 
 var points = curve.getPoints( 50 );*/
-var points = [
-  
-];
 
-vet0 = new THREE.Vector3( -10, 0, 10 );
-vet1 = new THREE.Vector3( -5, 15, 10 );
-vet2 = new THREE.Vector3( 20, 15, -5 );
-vet3 = new THREE.Vector3( 10, 10, 0 );
+const c1 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( 0, 5, 15 ),
+	new THREE.Vector3( 0, 5, 5 ),
+	new THREE.Vector3( 0, 20, 5 ),
+	new THREE.Vector3( 0, 20, 0 )
+);
 
+//points.add(curve1.getPoint(100));
+var p1 = c1.getPoints(100);
+console.log(p1);
 
-let i = 0.00;
-while(i < 1) {
+const c2 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( 0, 20, 0 ),
+	new THREE.Vector3( 0, 20, -5 ),
+	new THREE.Vector3( 0, 7.5, -5 ),
+	new THREE.Vector3( 0, 7.5, -10)
+);
+const p2 = c2.getPoints(100);
+var points = p1.concat(p2);
 
-  var newvet = new THREE.Vector3( 0, 0, 0 );
+const c3 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( 0, 7.5, -10 ),
+	new THREE.Vector3( 0, 7.5, -12.5 ),
+	new THREE.Vector3( 0, 11, -12.5 ),
+	new THREE.Vector3( 0, 11, -15)
+);
+const p3 = c3.getPoints(100);
+var points = points.concat(p3);
 
-  var cordx0 = (vet0.getComponent(0))*(Math.pow(1-i, 3));
-  var cordy0 = (vet0.getComponent(1))*(Math.pow(1-i, 3));
-  var cordz0 = (vet0.getComponent(2))*(Math.pow(1-i, 3));
-  var newvet0 = new THREE.Vector3( cordx0, cordy0, cordz0 );
+const c4 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( 0, 11, -15),
+	new THREE.Vector3( 0, 11, -17.5),
+	new THREE.Vector3( 0, 7.5, -17.5 ),
+	new THREE.Vector3( 0, 7.5, -20)
+);
+const p4 = c4.getPoints(100);
+var points = points.concat(p4);
 
-  var cordx1 = (vet1.getComponent(0))*(3*i*(Math.pow(1-i, 2)));
-  var cordy1 = (vet1.getComponent(1))*(3*i*(Math.pow(1-i, 2)));
-  var cordz1 = (vet1.getComponent(2))*(3*i*(Math.pow(1-i, 2)));
-  var newvet1 = new THREE.Vector3( cordx1, cordy1, cordz1 );
+const c5 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( 0, 7.5, -20),
+	new THREE.Vector3( 0, 7.5, -22.5),
+	new THREE.Vector3( 0, 10, -25 ),
+	new THREE.Vector3( -3, 12.5, -27.5)
+);
+const p5 = c5.getPoints(100);
+var points = points.concat(p5);
 
-  var cordx2 = (vet2.getComponent(0))*(3*i*i*(1-i));
-  var cordy2= (vet2.getComponent(1))*(3*i*i*(1-i));
-  var cordz2 = (vet2.getComponent(2))*(3*i*i*(1-i));
-  var newvet2 = new THREE.Vector3( cordx2, cordy2, cordz2 );
-  
-  var cordx3 = (vet3.getComponent(0))*(Math.pow(1-i, 3));
-  var cordy3 = (vet3.getComponent(1))*(Math.pow(1-i, 3));
-  var cordz3 = (vet3.getComponent(2))*(Math.pow(1-i, 3));
-  var newvet3 = new THREE.Vector3( cordx3, cordy3, cordz3 );
-  
-  newvet = newvet.add(newvet0);
-  newvet = newvet.add(newvet1);
-  newvet = newvet.add(newvet2);
-  newvet = newvet.add(newvet3);
-  
-  //console.log(newvet);
-  points.push(newvet);
-  i = i + 0.01;
-  //console.log(i);
+const c6 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( -3, 12.5, -27.5),
+	new THREE.Vector3( -6, 15, -30),
+	new THREE.Vector3( -16, 15, -30 ),
+	new THREE.Vector3( -19, 12.5, -27.5)
+);
+const p6 = c6.getPoints(100);
+var points = points.concat(p6);
 
-}
-//console.log(points);
+const c7 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( -19, 12.5, -27.5),
+	new THREE.Vector3( -22, 10, -25),
+	new THREE.Vector3( -22, 7.5, -17.5 ),
+	new THREE.Vector3( -22, 7.5, -12.5)
+);
+const p7 = c7.getPoints(100);
+var points = points.concat(p7);
 
-var veteste1 = new THREE.Vector3( 1, 1, 1 );
-var veteste2 = new THREE.Vector3( 2, 2, 2 );
-veteste1 = veteste1.add(veteste2);
-//console.log(veteste1);
+const c8 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( -22, 7.5, -12.5),
+	new THREE.Vector3( -22, 7.5, -7.5),
+	new THREE.Vector3( -22, 12.5, -5 ),
+	new THREE.Vector3( -22, 12.5, -2.5)
+);
+const p8 = c8.getPoints(100);
+var points = points.concat(p8);
 
-var geometry = new THREE.BufferGeometry().setFromPoints( points );
+const c9 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( -22, 12.5, -2.5),
+	new THREE.Vector3( -22, 12.5, 0),
+	new THREE.Vector3( -22, 7.5, 2.5 ),
+	new THREE.Vector3( -22, 7.5, 10)
+);
+const p9 = c9.getPoints(100);
+var points = points.concat(p9);
 
-var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+const c10 = new THREE.CubicBezierCurve3(
+	new THREE.Vector3( -22, 7.5, 10),
+	new THREE.Vector3( -22, 7.5, 17.5),
+	new THREE.Vector3( 0, 5, 25 ),
+	new THREE.Vector3( 0, 5, 15)
+);
+const p10 = c10.getPoints(100);
+var points = points.concat(p10);
+
+const geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+const material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
 
 // Create the final object to add to the scene
-var curveObject = new THREE.Line( geometry, material );
+const curveObject = new THREE.Line( geometry, material );
 scene.add(curveObject);
 
 // Ball
@@ -124,7 +164,7 @@ function render() {
   renderer.render(scene, camera);
 
   time += clock.getDelta();
-  console.log(time);
+  //console.log(time);
   update_ball();
 
   //curve.points[1].y = Math.sin(time) * 2.5;
