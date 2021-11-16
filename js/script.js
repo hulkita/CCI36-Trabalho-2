@@ -3,22 +3,25 @@ console.log("Script Loaded");
 let scene, camera, renderer, canvas, controls;
 let geometry, material, carro, points, tangent;
 let clock,time;
-let dirLight, spotLight;
+let dirLight, spotLight,camerahelpshadow;
 let dirLightShadowMapViewer, spotLightShadowMapViewer;
 let guia;
-let camera_no_carrinho;
+let tipo_camera;
+let valor, speed;
 	
 const state = {
 	shadow: {
-		blur: 3.5,
-		darkness: 1,
-		opacity: 1,
+		x: 20,
+		y: 100,
+		z: 50,
+		showWireframe: false
 	},
 	plane: {
 		color: '#ffffff',
 		opacity: 1,
 	},
-	showWireframe: false,
+	cameraType:0
+	
 };
 
 init();
@@ -34,13 +37,13 @@ function init(){
 	
 	window.addEventListener("keydown", function (event) {
 		if (event.key == "c") {
-		  if(camera_no_carrinho == 1){
-			camera_no_carrinho = 0;
+		  if(tipo_camera == 1){
+			tipo_camera = 0;
 			camera.position.set(50, 50, 0);
 			camera.lookAt(0,30,0);
 		  }      
 		  else{
-			camera_no_carrinho = 1;
+			tipo_camera = 1;
 		  }      
 		  return;
 		}
@@ -49,41 +52,58 @@ function init(){
 }
 
 function initGUI(){
-	import('./build/dat.gui.module.js').then(({ GUI }) => {
+	import('../build/dat.gui.module.js').then(({ GUI }) => {
 		console.log("oi")
 		guia = new GUI();
-				const shadowFolder = guia.addFolder( 'shadow' );
+				const shadowFolder = guia.addFolder( 'shadowPosition' );
 				shadowFolder.open();
-				const planeFolder = guia.addFolder( 'plane' );
-				planeFolder.open();
+				const cameraFolder = guia.addFolder( 'cameraType' );
+				cameraFolder.open();
 
-				/*
-				shadowFolder.add( state.shadow, 'blur', 0, 15, 0.1 );
-				shadowFolder.add( state.shadow, 'darkness', 1, 5, 0.1 ).onChange( function () {
-
-					carro.userData.darkness.value = state.shadow.darkness;
+				
+				shadowFolder.add( state.shadow, 'x', 0, 100, 2 ).onChange( function () {
+					spotLight.position.x = state.shadow.x
+				} );
+				shadowFolder.add( state.shadow, 'y', 0, 100, 2 ).onChange( function () {
+					
+					spotLight.position.y = state.shadow.y
 
 				} );
-				shadowFolder.add( state.shadow, 'opacity', 0, 1, 0.01 ).onChange( function () {
+				shadowFolder.add( state.shadow, 'z', 0, 100, 2 ).onChange( function () {
+					
+					spotLight.position.z = state.shadow.z
 
-					ground.material.opacity = state.shadow.opacity;
-
-				} );*/
+				} );				
 				
+				shadowFolder.add( state.shadow, 'showWireframe', false ).onChange( function () {
 
-				/*gui.add( state, 'showWireframe', true ).onChange( function () {
+					if ( state.shadow.showWireframe ) {
 
-					if ( state.showWireframe ) {
-
-						scene.add( cameraHelper );
+						camerahelpshadow.visible = true;
 
 					} else {
 
-						scene.remove( cameraHelper );
+						camerahelpshadow.visible = false;
 
 					}
 
-				} );*/
+				} );
+
+				cameraFolder.add( state, 'cameraType', 0, 2, 1 ).onChange( function () {
+					if(state.cameraType == 0){
+						tipo_camera = 0;
+						camera.position.set(50, 50, 0);
+						camera.lookAt(0,30,0);
+					  }      
+					  else{
+						if(state.cameraType == 1)tipo_camera = 1;
+						else{
+
+						}
+					  }
+					
+
+				} );
 	  })
 	
 }
@@ -91,6 +111,7 @@ function initGUI(){
 function initScene() {
 	scene = new THREE.Scene();
 	let worldAxis = new THREE.AxesHelper(100);
+	worldAxis.visible = false;
 	scene.add(worldAxis);
 	camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
 	camera.position.set(50, 50, 0);
@@ -118,7 +139,8 @@ function initMisc(){
 	clock = new THREE.Clock();
 	time = 0;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);	
-	camera_no_carrinho=0;
+	tipo_camera=0;
+	speed = 100;
 	
 }
 
@@ -131,7 +153,7 @@ function grid(){
 function ground(){
 	geometry = new THREE.BoxGeometry( 10, 0.15, 10 );
 	material = new THREE.MeshPhongMaterial( {
-		color: 0xa0adaf,
+		color: 0x42e8eb,//a0adaf,
 		shininess: 150,
 		specular: 0x111111
 	} );
@@ -305,13 +327,14 @@ function lights(){
 	 spotLight.position.set( 20, 100, 50 );
 	 spotLight.castShadow = true;
 	 spotLight.shadow.camera.near = 8;
-	 spotLight.shadow.camera.far = 150;
+	 spotLight.shadow.camera.far = 300;
 	 spotLight.shadow.mapSize.width = 1024;
 	 spotLight.shadow.mapSize.height = 1024;
 	 scene.add( spotLight );
-
-	 scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
-
+	 camerahelpshadow =new THREE.CameraHelper( spotLight.shadow.camera )
+	 camerahelpshadow.visible = false;
+	 scene.add( camerahelpshadow );
+		
 	 dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
 	 dirLight.name = 'Dir. Light';
 	 dirLight.position.set( 20, 50, 20 );
@@ -325,7 +348,6 @@ function lights(){
 	 dirLight.shadow.mapSize.width = 2048;
 	 dirLight.shadow.mapSize.height = 2048;
 	 //scene.add( dirLight );
-
 	 //scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
 
 }
@@ -420,43 +442,21 @@ function makeWheel() {
   }
 
 function update_car() {
-	let speed = 100;
-	let valor = Math.trunc(time*speed)%1000;
+	valor = Math.trunc(time*speed)%1000;
 	carro.position.x = points[valor].getComponent(0);
 	carro.position.y = points[valor].getComponent(1);
 	carro.position.z = points[valor].getComponent(2);
 
-	//let next_point = new THREE.Vector3(points[(Math.trunc(time) % 1000)+1].getComponent(0), points[(Math.trunc(time) % 1000)+1].getComponent(1), points[(Math.trunc(time) % 1000)+1].getComponent(2)); 
-	//carro.rotation=( tangent);
-	//console.log(tangent[valor].x);
-	//console.log(tangent[((Math.trunc(time)+1 )% 1000)][0]*Math.PI)
-	//carro.rotation.y = tangent[valor].x*Math.PI;
-	//carro.rotation.y = tangent[valor].z*Math.PI;
-	//carro.rotation.z = tangent[valor].y*Math.PI;
 	carro.lookAt(points[valor+1]);
 
-	//camera_no_carrinho = 1;
-	if (camera_no_carrinho == 1) {
+}
+
+function update_camera(){
+	if (tipo_camera == 1) {
 		camera.position.set(carro.position.x, carro.position.y, carro.position.z);
 		camera.lookAt(points[valor+1].x, points[valor+1].y, points[valor+1].z);
-		camera.updateProjectionMatrix();
-	
-	  }
-
-	/*let oldDir = new THREE.Vector3();
-    let newDir = new THREE.Vector3();
-
-	
-	carro.getWorldDirection(oldDir);
-	
-    newDir.subVectors(points[valor+1], carro.position).normalize();
-	//console.log(newDir);
-    const theta = Math.acos(newDir.dot(oldDir));
-
-    const axis = new THREE.Vector3().crossVectors(oldDir, newDir).normalize();
-
-    carro.rotateOnWorldAxis(axis, theta);*/
-
+		camera.updateProjectionMatrix();	
+	}
 }
 
 function envmap(){
@@ -465,7 +465,7 @@ function envmap(){
 	// invert the geometry on the x-axis so that all of the faces point inward
 	geo.scale( - 1, 1, 1 );
 
-	const texture = new THREE.TextureLoader().load( 'img/img1.jpg' );
+	const texture = new THREE.TextureLoader().load( "./img/img1.jpg" );
 	const mat = new THREE.MeshBasicMaterial( { map: texture } );
 
 	const mesh = new THREE.Mesh( geo, mat );
@@ -479,6 +479,7 @@ function animate() {
 	render();
 	time += clock.getDelta();
 	update_car();
+	update_camera();
 
 }
 
