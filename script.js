@@ -81,7 +81,7 @@ function initScene() {
 	//scene.add( new THREE.AmbientLight( 0x404040 ) );
 	//grid();
 	rollercoaster();
-	car();
+	car1();
 	envmap();
 	ground();
 	lights();
@@ -292,15 +292,61 @@ function resizeShadowMapViewers() {
 
 }
 
-function car(){
+function car1(){
 	// Ball
-	geometry = new THREE.SphereGeometry(2, 20, 32); // (radius, widthSegments, heightSegments)
+	/*geometry = new THREE.SphereGeometry(2, 20, 32); // (radius, widthSegments, heightSegments)
 	material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-	carro = new THREE.Mesh(geometry, material);
+	carro = new THREE.Mesh(geometry, material);*/
+	carro = makeCar();
 	carro.castShadow = true;
 	carro.receiveShadow = true;
 	scene.add(carro);
 }
+
+function makeCar() {
+	var car = new THREE.Group();
+	//add rodas
+	var wheel = makeWheel();
+	positions = [[-18, 18], [-18, -18], [18, 18], [18, -18]];
+	for (var i = 0; i < positions.length; i++) {
+	  x = positions[i][0]
+	  y = positions[i][1]
+	  m = wheel.clone()
+	  m.position.x = x
+	  m.position.y = y
+	  car.add(m)
+	}
+	//add parte principal
+	var main = new THREE.Mesh(
+	  new THREE.BoxBufferGeometry(60, 30, 15),
+	  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+	);
+	main.position.z = 12;
+	car.add(main);
+	// add cabine
+	var cabin = new THREE.Mesh(
+	  new THREE.BoxBufferGeometry(33, 24, 12),
+	  new THREE.MeshBasicMaterial({ color: 0x0000ff })
+	);
+	cabin.position.x = -6;
+	cabin.position.z = 25.5;
+	car.add(cabin);
+	car.scale.set( 0.05, 0.05, 0.05 );
+	car.rotation.x = -Math.PI / 2;
+	car.rotation.z = Math.PI / 2;
+	return car;
+  }
+
+//criando rodas
+function makeWheel() {
+	const geometry = new THREE.CylinderGeometry(6, 6, 5, 32);
+	const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+	var wheel = new THREE.Mesh(geometry, material);
+	wheel.position.z = 6;
+	return wheel;
+  }
+
+
 
 function update_car() {
 	let speed = 150;
