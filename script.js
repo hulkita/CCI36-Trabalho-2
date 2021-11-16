@@ -6,7 +6,7 @@ let clock,time;
 let dirLight, spotLight;
 let dirLightShadowMapViewer, spotLightShadowMapViewer;
 let guia;
-let camera_no_carrinho;
+let camera_ref;
 	
 const state = {
 	shadow: {
@@ -34,16 +34,28 @@ function init(){
 	
 	window.addEventListener("keydown", function (event) {
 		if (event.key == "c") {
-		  if(camera_no_carrinho == 1){
-			camera_no_carrinho = 0;
+		  if(camera_ref == 1){
+			camera_ref = 0;
 			camera.position.set(50, 50, 0);
 			camera.lookAt(0,30,0);
 		  }      
 		  else{
-			camera_no_carrinho = 1;
+			camera_ref = 1;
 		  }      
 		  return;
 		}
+		if (event.key == "d") {
+			if(camera_ref == 2){
+				camera_ref = 0;
+				camera.position.set(50, 50, 0);
+				camera.lookAt(0,30,0);
+			}      
+			else{
+				camera_ref = 2;
+			}      
+			return;
+		  }
+
 	});
 
 }
@@ -118,7 +130,7 @@ function initMisc(){
 	clock = new THREE.Clock();
 	time = 0;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);	
-	camera_no_carrinho=0;
+	camera_ref=0;
 	
 }
 
@@ -430,12 +442,18 @@ function update_car() {
 	carro.lookAt(points[valor+1]);
 
 	//camera_no_carrinho = 1;
-	if (camera_no_carrinho == 1) {
+	if (camera_ref == 1) {
 		camera.position.set(carro.position.x, carro.position.y, carro.position.z);
 		camera.lookAt(points[valor+1].x, points[valor+1].y, points[valor+1].z);
 		camera.updateProjectionMatrix();
 	
-	  }
+	}
+	if (camera_ref == 2) {
+		camera.position.set(carro.position.x+20, carro.position.y+10, carro.position.z);
+		camera.lookAt(carro.position);
+		camera.updateProjectionMatrix();
+
+	}
 
 	/*let oldDir = new THREE.Vector3();
     let newDir = new THREE.Vector3();
