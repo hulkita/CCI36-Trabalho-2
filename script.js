@@ -27,11 +27,13 @@ function init(){
 	initScene();
 	initMisc();
 	//initShadowMapViewers()
-	//initGUI();
+	initGUI();
 }
 
 function initGUI(){
-	guia = new GUI();
+	import('./build/dat.gui.module.js').then(({ GUI }) => {
+		console.log("oi")
+		guia = new GUI();
 				const shadowFolder = guia.addFolder( 'shadow' );
 				shadowFolder.open();
 				const planeFolder = guia.addFolder( 'plane' );
@@ -64,6 +66,8 @@ function initGUI(){
 					}
 
 				} );*/
+	  })
+	
 }
 
 function initScene() {
