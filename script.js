@@ -1,11 +1,12 @@
 
 console.log("Script Loaded");
-let scene, camera, renderer, canvas,controls;
-let geometry, material, carro,points;
+let scene, camera, renderer, canvas, controls;
+let geometry, material, carro, points, tangent;
 let clock,time;
 let dirLight, spotLight;
 let dirLightShadowMapViewer, spotLightShadowMapViewer;
 let guia;
+let camera_no_carrinho;
 	
 const state = {
 	shadow: {
@@ -25,13 +26,32 @@ animate();
 
 function init(){
 	initScene();
-	initMisc();
+	initMisc();	
 	//initShadowMapViewers()
-	//initGUI();
+	initGUI();
+	
+
+	
+	window.addEventListener("keydown", function (event) {
+		if (event.key == "c") {
+		  if(camera_no_carrinho == 1){
+			camera_no_carrinho = 0;
+			camera.position.set(50, 50, 0);
+			camera.lookAt(0,30,0);
+		  }      
+		  else{
+			camera_no_carrinho = 1;
+		  }      
+		  return;
+		}
+	});
+
 }
 
 function initGUI(){
-	guia = new GUI();
+	import('./build/dat.gui.module.js').then(({ GUI }) => {
+		console.log("oi")
+		guia = new GUI();
 				const shadowFolder = guia.addFolder( 'shadow' );
 				shadowFolder.open();
 				const planeFolder = guia.addFolder( 'plane' );
@@ -64,12 +84,17 @@ function initGUI(){
 					}
 
 				} );*/
+	  })
+	
 }
 
 function initScene() {
 	scene = new THREE.Scene();
+	let worldAxis = new THREE.AxesHelper(100);
+	scene.add(worldAxis);
 	camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
-	camera.position.set(8, 13, 25);
+	camera.position.set(50, 50, 0);
+	camera.lookAt(0,30,0);
 	renderer = new THREE.WebGLRenderer({
 	antialias: true
 	});
@@ -89,9 +114,12 @@ function initScene() {
 }
 
 function initMisc(){
+	
 	clock = new THREE.Clock();
-	time = 0;	
-	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	time = 0;
+	controls = new THREE.OrbitControls(camera, renderer.domElement);	
+	camera_no_carrinho=0;
+	
 }
 
 function grid(){
@@ -116,7 +144,17 @@ function ground(){
 	scene.add( ground );
 }
 
+function tangente(c1){
+	let t1;
+	let i=0;
+	for(i = 1; i <= 100; i++){
+		t1 = c1.getTangent(i/100);
+		tangent = tangent.concat(t1);
+	}
+}
+
 function rollercoaster(){
+	console.log("rollercoaster");
 		/*
 	var curve = new THREE.CubicBezierCurve3(
 		new THREE.Vector3( -10, 0, 0 ),
@@ -126,7 +164,8 @@ function rollercoaster(){
 	);
 
 	var points = curve.getPoints( 50 );*/
-
+	
+	
 	const c1 = new THREE.CubicBezierCurve3(
 		new THREE.Vector3( 0, 5, 15 ),
 		new THREE.Vector3( 0, 5, 5 ),
@@ -135,9 +174,8 @@ function rollercoaster(){
 	);
 
 	//points.add(curve1.getPoint(100));
-	var p1 = c1.getPoints(100);
-	//console.log(p1);
-
+	var p1 = c1.getPoints(100);		
+	
 	const c2 = new THREE.CubicBezierCurve3(
 		new THREE.Vector3( 0, 20, 0 ),
 		new THREE.Vector3( 0, 20, -5 ),
@@ -145,6 +183,7 @@ function rollercoaster(){
 		new THREE.Vector3( 0, 7.5, -10)
 	);
 	const p2 = c2.getPoints(100);
+	let t2 = c2.getTangent(100);
 	points = p1.concat(p2);
 
 	const c3 = new THREE.CubicBezierCurve3(
@@ -154,6 +193,7 @@ function rollercoaster(){
 		new THREE.Vector3( 0, 11, -15)
 	);
 	const p3 = c3.getPoints(100);
+	let t3 = c3.getTangent(100);
 	points = points.concat(p3);
 
 	const c4 = new THREE.CubicBezierCurve3(
@@ -163,6 +203,7 @@ function rollercoaster(){
 		new THREE.Vector3( 0, 7.5, -20)
 	);
 	const p4 = c4.getPoints(100);
+	let t4 = c4.getTangent(100);
 	points = points.concat(p4);
 
 	const c5 = new THREE.CubicBezierCurve3(
@@ -172,7 +213,8 @@ function rollercoaster(){
 		new THREE.Vector3( -3, 12.5, -27.5)
 	);
 	const p5 = c5.getPoints(100);
-	points = points.concat(p5);
+	let t5 = c5.getTangent(100);
+	points = points.concat(p5);	
 
 	const c6 = new THREE.CubicBezierCurve3(
 		new THREE.Vector3( -3, 12.5, -27.5),
@@ -181,6 +223,7 @@ function rollercoaster(){
 		new THREE.Vector3( -19, 12.5, -27.5)
 	);
 	const p6 = c6.getPoints(100);
+	let t6 = c6.getTangent(100);
 	points = points.concat(p6);
 
 	const c7 = new THREE.CubicBezierCurve3(
@@ -190,6 +233,7 @@ function rollercoaster(){
 		new THREE.Vector3( -22, 7.5, -12.5)
 	);
 	const p7 = c7.getPoints(100);
+	let t7 = c7.getTangent(100);
 	points = points.concat(p7);
 
 	const c8 = new THREE.CubicBezierCurve3(
@@ -199,6 +243,7 @@ function rollercoaster(){
 		new THREE.Vector3( -22, 12.5, -2.5)
 	);
 	const p8 = c8.getPoints(100);
+	let t8 = c8.getTangent(100);
 	points = points.concat(p8);
 
 	const c9 = new THREE.CubicBezierCurve3(
@@ -208,6 +253,7 @@ function rollercoaster(){
 		new THREE.Vector3( -22, 7.5, 10)
 	);
 	const p9 = c9.getPoints(100);
+	let t9 = c9.getTangent(100);
 	points = points.concat(p9);
 
 	const c10 = new THREE.CubicBezierCurve3(
@@ -217,8 +263,23 @@ function rollercoaster(){
 		new THREE.Vector3( 0, 5, 15)
 	);
 	const p10 = c10.getPoints(100);
+	let t10 = c10.getTangent(100);
 	points = points.concat(p10);
 
+	tangent = [];
+	tangente(c1);
+	tangente(c2);
+	tangente(c3);
+	tangente(c4);
+	tangente(c5);
+	tangente(c6);
+	tangente(c7);
+	tangente(c8);
+	tangente(c9);
+	tangente(c10);
+
+	console.log(tangent);
+	console.log(points);
 	geometry = new THREE.BufferGeometry().setFromPoints( points );
 
 	material = new THREE.LineBasicMaterial( { 
@@ -249,7 +310,7 @@ function lights(){
 	 spotLight.shadow.mapSize.height = 1024;
 	 scene.add( spotLight );
 
-	 scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
+	 //scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
 
 	 dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
 	 dirLight.name = 'Dir. Light';
@@ -333,8 +394,14 @@ function makeCar() {
 	car.add(cabin);
 	car.scale.set( 0.05, 0.05, 0.05 );
 	car.rotation.x = -Math.PI / 2;
-	car.rotation.z = Math.PI / 2;
-	return car;
+	car.rotation.z = -Math.PI / 2;
+	var car2 = new THREE.Group();
+	car2.add(car);	
+	car2.castShadow = true;
+	car2.receiveShadow = true;
+	var axes = new THREE.AxesHelper( 5 );
+	//car2 = car2.add(axes);
+	return car2;
   }
 
 //criando rodas
@@ -346,14 +413,44 @@ function makeWheel() {
 	return wheel;
   }
 
-
-
 function update_car() {
-	let speed = 150;
+	let speed = 100;
 	let valor = Math.trunc(time*speed)%1000;
 	carro.position.x = points[valor].getComponent(0);
 	carro.position.y = points[valor].getComponent(1);
 	carro.position.z = points[valor].getComponent(2);
+
+	//let next_point = new THREE.Vector3(points[(Math.trunc(time) % 1000)+1].getComponent(0), points[(Math.trunc(time) % 1000)+1].getComponent(1), points[(Math.trunc(time) % 1000)+1].getComponent(2)); 
+	//carro.rotation=( tangent);
+	//console.log(tangent[valor].x);
+	//console.log(tangent[((Math.trunc(time)+1 )% 1000)][0]*Math.PI)
+	//carro.rotation.y = tangent[valor].x*Math.PI;
+	//carro.rotation.y = tangent[valor].z*Math.PI;
+	//carro.rotation.z = tangent[valor].y*Math.PI;
+	carro.lookAt(points[valor+1]);
+
+	//camera_no_carrinho = 1;
+	if (camera_no_carrinho == 1) {
+		camera.position.set(carro.position.x, carro.position.y, carro.position.z);
+		camera.lookAt(points[valor+1].x, points[valor+1].y, points[valor+1].z);
+		camera.updateProjectionMatrix();
+	
+	  }
+
+	/*let oldDir = new THREE.Vector3();
+    let newDir = new THREE.Vector3();
+
+	
+	carro.getWorldDirection(oldDir);
+	
+    newDir.subVectors(points[valor+1], carro.position).normalize();
+	//console.log(newDir);
+    const theta = Math.acos(newDir.dot(oldDir));
+
+    const axis = new THREE.Vector3().crossVectors(oldDir, newDir).normalize();
+
+    carro.rotateOnWorldAxis(axis, theta);*/
+
 }
 
 function envmap(){
