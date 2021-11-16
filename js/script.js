@@ -6,7 +6,6 @@ let clock,time;
 let dirLight, spotLight,camerahelpshadow;
 let dirLightShadowMapViewer, spotLightShadowMapViewer;
 let guia;
-let tipo_camera;
 let valor, speed;
 let camera_ref;
 	
@@ -15,7 +14,7 @@ const state = {
 		x: 20,
 		y: 100,
 		z: 50,
-		showWireframe: false
+		showShadowHelperLines: false
 	},
 	plane: {
 		color: '#ffffff',
@@ -74,23 +73,23 @@ function initGUI(){
 				cameraFolder.open();
 
 				
-				shadowFolder.add( state.shadow, 'x', 0, 100, 2 ).onChange( function () {
+				shadowFolder.add( state.shadow, 'x', -100, 100, 2 ).onChange( function () {
 					spotLight.position.x = state.shadow.x
 				} );
-				shadowFolder.add( state.shadow, 'y', 0, 100, 2 ).onChange( function () {
+				shadowFolder.add( state.shadow, 'y', 0, 200, 2 ).onChange( function () {
 					
 					spotLight.position.y = state.shadow.y
 
 				} );
-				shadowFolder.add( state.shadow, 'z', 0, 100, 2 ).onChange( function () {
+				shadowFolder.add( state.shadow, 'z', -100, 200, 2 ).onChange( function () {
 					
 					spotLight.position.z = state.shadow.z
 
 				} );				
 				
-				shadowFolder.add( state.shadow, 'showWireframe', false ).onChange( function () {
+				shadowFolder.add( state.shadow, 'showShadowHelperLines', false ).onChange( function () {
 
-					if ( state.shadow.showWireframe ) {
+					if ( state.shadow.showShadowHelperLines ) {
 
 						camerahelpshadow.visible = true;
 
@@ -104,14 +103,17 @@ function initGUI(){
 
 				cameraFolder.add( state, 'cameraType', 0, 2, 1 ).onChange( function () {
 					if(state.cameraType == 0){
-						tipo_camera = 0;
+						camera_ref = 0;
 						camera.position.set(50, 50, 0);
 						camera.lookAt(0,30,0);
 					  }      
 					  else{
-						if(state.cameraType == 1)tipo_camera = 1;
+						if(state.cameraType == 1)camera_ref = 1;
 						else{
-
+							camera_ref = 2;
+							camera.position.set(carro.position.x+20, carro.position.y+10, carro.position.z);
+							camera.lookAt(carro.position);
+							camera.updateProjectionMatrix();
 						}
 					  }
 					
@@ -152,7 +154,7 @@ function initMisc(){
 	clock = new THREE.Clock();
 	time = 0;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);	
-	tipo_camera=0;
+	camera_ref=0;
 	speed = 100;
 	camera_ref=0;
 	
