@@ -139,13 +139,21 @@ function initScene() {
 	canvas = renderer.domElement;
 	document.body.appendChild(canvas);
 
-	//scene.add( new THREE.AmbientLight( 0x404040 ) );
+	scene.add( new THREE.AmbientLight( 0x404040 ) );
 	//grid();
+	envirmap();
 	rollercoaster();
-	car1();
-	envmap();
+	car1();	
 	ground();
 	lights();
+
+	/*var main2 = new THREE.BoxBufferGeometry(60, 30, 15);
+	var geo2 = new THREE.MeshLambertMaterial( { envMap: ambmap } );
+	var main = new THREE.Mesh( geo2,main2 );
+
+	scene.add(main);*/
+
+	
 
 }
 
@@ -155,7 +163,7 @@ function initMisc(){
 	time = 0;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);	
 	camera_ref=0;
-	speed = 100;
+	speed = 0;
 	camera_ref=0;
 	
 }
@@ -400,13 +408,17 @@ function car1(){
 	carro.castShadow = true;
 	carro.receiveShadow = true;
 	scene.add(carro);
+
+	
+
 }
 
 function makeCar() {
 	var car = new THREE.Group();
 	//add rodas
 	var wheel = makeWheel();
-	positions = [[-18, 18], [-18, -18], [18, 18], [18, -18]];
+	//positions = [[-18, 18], [-18, -18], [18, 18], [18, -18]];
+	positions = [[0,0]];
 	for (var i = 0; i < positions.length; i++) {
 	  x = positions[i][0]
 	  y = positions[i][1]
@@ -415,40 +427,80 @@ function makeCar() {
 	  m.position.y = y
 	  car.add(m)
 	}
+
+	const geometry = new THREE.BoxBufferGeometry(60, 30, 15);
+	mainMaterial = new THREE.MeshLambertMaterial( { 
+		//color:0xff0000,
+		envMap: ambmap,
+		metalness: 0.5,
+		roughness: 0.5 
+	} );
+	/*new THREE.MeshStandardMaterial( {
+		metalness: params.roughness,
+		roughness: params.metalness,
+		envMapIntensity: 1.0
+	} );*/
+	mainMesh = new THREE.Mesh( geometry, mainMaterial );
+	mainMesh.position.z = 12;
+	mainMesh.castShadow = true;
+	mainMesh.receiveShadow = true;
+	car.add( mainMesh );
+
+
 	//add parte principal
-	var main = new THREE.Mesh(
+	/*var main = new THREE.Mesh(
 	  new THREE.BoxBufferGeometry(60, 30, 15),
-	  /*new THREE.MeshStandardMaterial( {
+	  new THREE.MeshStandardMaterial( {
 		color: 0xff0000,
 		metalness: 1,   // between 0 and 1
 		//roughness: 0.5, // between 0 and 1
-		envmap: ambmap
-	} )*/
+		envMap: ambmap
+	} )
 		new THREE.MeshPhongMaterial( {
 			color: 0xff0000,
 			shininess: 150,
 			specular: 0x222222,
 			envmap: ambmap
 		} )
-	);
+	);*/
+	
+/*
 	main.position.z = 12;
 	main.castShadow = true;
-	main.receiveShadow = true;
-	car.add(main);
+	main.receiveShadow = true;*/
+	//car.add(main);
 	// add cabine
-	var cabin = new THREE.Mesh(
-	  new THREE.BoxBufferGeometry(33, 24, 12),
+	var glass = new THREE.Mesh(
+	  new THREE.BoxBufferGeometry(3, 24, 16),
 	  new THREE.MeshBasicMaterial({ 
-		  color: 0x0000ff 
+		  color: 0x0000ff,
+		  opacity: 0.8,
+		  transparent: true
+
 		})
 	);
-	cabin.position.x = -6;
-	cabin.position.z = 25.5;
-	cabin.castShadow = true;
-	cabin.receiveShadow = true;
-	car.add(cabin);
+	glass.position.x = 20;
+	glass.position.z = 23.5;
+	glass.rotation.y = -Math.PI / 4;
+	glass.castShadow = true;
+	glass.receiveShadow = true;
+	car.add(glass);
+
+	var cabin = new THREE.Mesh(
+		new THREE.BoxBufferGeometry(1, 24, 45),
+		new THREE.MeshBasicMaterial({ 
+			color: 0x000000  
+		  })
+	  );
+	  cabin.position.x = -1;
+	  cabin.position.z = 19.5;
+	  cabin.rotation.y = -Math.PI / 2;
+	  cabin.castShadow = true;
+	  cabin.receiveShadow = true;
+	  car.add(cabin);
+
 	car.scale.set( 0.05, 0.05, 0.05 );
-	car.scale.set( 1, 1, 1 );
+	//car.scale.set( 1, 1, 1 );
 	car.rotation.x = -Math.PI / 2;
 	car.rotation.z = -Math.PI / 2;
 	var car2 = new THREE.Group();
@@ -462,10 +514,19 @@ function makeCar() {
 
 //criando rodas
 function makeWheel() {
-	const geometry = new THREE.CylinderGeometry(6, 6, 5, 32);
+	const geometry = new THREE.CylinderGeometry(6, 6, 40, 32);
 	const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+	var cabin = new THREE.Mesh(
+		new THREE.BoxGeometry(12, 40, 6),
+		new THREE.MeshBasicMaterial({ 
+			color: 0x000000 
+		  })
+	  );
+	  cabin.position.z= 3;
 	var wheel = new THREE.Mesh(geometry, material);
-	wheel.position.z = 6;
+	wheel.add(cabin);
+	//wheel.position.z = 6;
+	wheel.rotation.z = Math.PI / 2;
 	wheel.castShadow = true;
 	wheel.receiveShadow = true;
 	return wheel;
@@ -509,18 +570,22 @@ function update_car() {
 
 }
 
-function envmap(){
+function envirmap(){
 	//envmap
 	const geo = new THREE.SphereGeometry( 500, 60, 40 );
 	// invert the geometry on the x-axis so that all of the faces point inward
 	geo.scale( - 1, 1, 1 );
 
 	ambmap = new THREE.TextureLoader().load( "./img/img1.jpg" );
+	ambmap.mapping = THREE.EquirectangularReflectionMapping;
+	ambmap.encoding = THREE.sRGBEncoding;
 	const mat = new THREE.MeshBasicMaterial( { map: ambmap } );
 
 	const mesh = new THREE.Mesh( geo, mat );
 
-	scene.add( mesh );
+	//scene.add( mesh );
+	scene.background = ambmap;
+
 }
 
 function animate() {
