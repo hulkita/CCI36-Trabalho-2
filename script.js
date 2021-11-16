@@ -291,7 +291,7 @@ function rollercoaster(){
 	// Create the final object to add to the scene
 	const curveObject = new THREE.Line( geometry, material );
 	curveObject.castShadow = true;
-	curveObject.receiveShadow = true;
+	curveObject.receiveShadow = true;	
 	scene.add(curveObject);
 }
 
@@ -310,7 +310,7 @@ function lights(){
 	 spotLight.shadow.mapSize.height = 1024;
 	 scene.add( spotLight );
 
-	 //scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
+	 scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
 
 	 dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
 	 dirLight.name = 'Dir. Light';
@@ -383,6 +383,8 @@ function makeCar() {
 	  new THREE.MeshBasicMaterial({ color: 0xff0000 })
 	);
 	main.position.z = 12;
+	main.castShadow = true;
+	main.receiveShadow = true;
 	car.add(main);
 	// add cabine
 	var cabin = new THREE.Mesh(
@@ -391,6 +393,8 @@ function makeCar() {
 	);
 	cabin.position.x = -6;
 	cabin.position.z = 25.5;
+	cabin.castShadow = true;
+	cabin.receiveShadow = true;
 	car.add(cabin);
 	car.scale.set( 0.05, 0.05, 0.05 );
 	car.rotation.x = -Math.PI / 2;
@@ -410,6 +414,8 @@ function makeWheel() {
 	const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
 	var wheel = new THREE.Mesh(geometry, material);
 	wheel.position.z = 6;
+	wheel.castShadow = true;
+	wheel.receiveShadow = true;
 	return wheel;
   }
 
