@@ -8,6 +8,7 @@ let dirLightShadowMapViewer, spotLightShadowMapViewer;
 let guia;
 let tipo_camera;
 let valor, speed;
+let camera_ref;
 	
 const state = {
 	shadow: {
@@ -37,16 +38,28 @@ function init(){
 	
 	window.addEventListener("keydown", function (event) {
 		if (event.key == "c") {
-		  if(tipo_camera == 1){
-			tipo_camera = 0;
+		  if(camera_ref == 1){
+			camera_ref = 0;
 			camera.position.set(50, 50, 0);
 			camera.lookAt(0,30,0);
 		  }      
 		  else{
-			tipo_camera = 1;
+			camera_ref = 1;
 		  }      
 		  return;
 		}
+		if (event.key == "d") {
+			if(camera_ref == 2){
+				camera_ref = 0;
+				camera.position.set(50, 50, 0);
+				camera.lookAt(0,30,0);
+			}      
+			else{
+				camera_ref = 2;
+			}      
+			return;
+		  }
+
 	});
 
 }
@@ -141,6 +154,7 @@ function initMisc(){
 	controls = new THREE.OrbitControls(camera, renderer.domElement);	
 	tipo_camera=0;
 	speed = 100;
+	camera_ref=0;
 	
 }
 
@@ -449,14 +463,34 @@ function update_car() {
 
 	carro.lookAt(points[valor+1]);
 
-}
-
-function update_camera(){
-	if (tipo_camera == 1) {
+	//camera_no_carrinho = 1;
+	if (camera_ref == 1) {
 		camera.position.set(carro.position.x, carro.position.y, carro.position.z);
 		camera.lookAt(points[valor+1].x, points[valor+1].y, points[valor+1].z);
-		camera.updateProjectionMatrix();	
+		camera.updateProjectionMatrix();
+	
 	}
+	if (camera_ref == 2) {
+		camera.position.set(carro.position.x+20, carro.position.y+10, carro.position.z);
+		camera.lookAt(carro.position);
+		camera.updateProjectionMatrix();
+
+	}
+
+	/*let oldDir = new THREE.Vector3();
+    let newDir = new THREE.Vector3();
+
+	
+	carro.getWorldDirection(oldDir);
+	
+    newDir.subVectors(points[valor+1], carro.position).normalize();
+	//console.log(newDir);
+    const theta = Math.acos(newDir.dot(oldDir));
+
+    const axis = new THREE.Vector3().crossVectors(oldDir, newDir).normalize();
+
+    carro.rotateOnWorldAxis(axis, theta);*/
+
 }
 
 function envmap(){
