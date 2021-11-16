@@ -163,7 +163,7 @@ function initMisc(){
 	time = 0;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);	
 	camera_ref=0;
-	speed = 0;
+	speed = 100;
 	camera_ref=0;
 	
 }
