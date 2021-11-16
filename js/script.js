@@ -8,6 +8,7 @@ let dirLightShadowMapViewer, spotLightShadowMapViewer;
 let guia;
 let valor, speed;
 let camera_ref;
+let ambmap;
 	
 const state = {
 	shadow: {
@@ -16,9 +17,10 @@ const state = {
 		z: 50,
 		showShadowHelperLines: false
 	},
-	plane: {
+	car: {
 		color: '#ffffff',
 		opacity: 1,
+		speed:100
 	},
 	cameraType:0
 	
@@ -71,7 +73,8 @@ function initGUI(){
 				shadowFolder.open();
 				const cameraFolder = guia.addFolder( 'cameraType' );
 				cameraFolder.open();
-
+				const carFolder = guia.addFolder( 'car' );
+				carFolder.open();
 				
 				shadowFolder.add( state.shadow, 'x', -100, 100, 2 ).onChange( function () {
 					spotLight.position.x = state.shadow.x
@@ -82,23 +85,15 @@ function initGUI(){
 
 				} );
 				shadowFolder.add( state.shadow, 'z', -100, 200, 2 ).onChange( function () {
-					
 					spotLight.position.z = state.shadow.z
-
 				} );				
 				
 				shadowFolder.add( state.shadow, 'showShadowHelperLines', false ).onChange( function () {
-
 					if ( state.shadow.showShadowHelperLines ) {
-
 						camerahelpshadow.visible = true;
-
 					} else {
-
 						camerahelpshadow.visible = false;
-
 					}
-
 				} );
 
 				cameraFolder.add( state, 'cameraType', 0, 2, 1 ).onChange( function () {
@@ -115,10 +110,15 @@ function initGUI(){
 							camera.lookAt(carro.position);
 							camera.updateProjectionMatrix();
 						}
-					  }
-					
-
+					  }			
 				} );
+
+				carFolder.add( state.car, 'speed', 0, 200, 2 ).onChange( function () {
+					speed = state.car.speed
+				} );
+
+
+
 	  })
 	
 }
@@ -418,7 +418,18 @@ function makeCar() {
 	//add parte principal
 	var main = new THREE.Mesh(
 	  new THREE.BoxBufferGeometry(60, 30, 15),
-	  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+	  /*new THREE.MeshStandardMaterial( {
+		color: 0xff0000,
+		metalness: 1,   // between 0 and 1
+		//roughness: 0.5, // between 0 and 1
+		envmap: ambmap
+	} )*/
+		new THREE.MeshPhongMaterial( {
+			color: 0xff0000,
+			shininess: 150,
+			specular: 0x222222,
+			envmap: ambmap
+		} )
 	);
 	main.position.z = 12;
 	main.castShadow = true;
@@ -427,7 +438,9 @@ function makeCar() {
 	// add cabine
 	var cabin = new THREE.Mesh(
 	  new THREE.BoxBufferGeometry(33, 24, 12),
-	  new THREE.MeshBasicMaterial({ color: 0x0000ff })
+	  new THREE.MeshBasicMaterial({ 
+		  color: 0x0000ff 
+		})
 	);
 	cabin.position.x = -6;
 	cabin.position.z = 25.5;
@@ -435,6 +448,7 @@ function makeCar() {
 	cabin.receiveShadow = true;
 	car.add(cabin);
 	car.scale.set( 0.05, 0.05, 0.05 );
+	car.scale.set( 1, 1, 1 );
 	car.rotation.x = -Math.PI / 2;
 	car.rotation.z = -Math.PI / 2;
 	var car2 = new THREE.Group();
@@ -501,8 +515,8 @@ function envmap(){
 	// invert the geometry on the x-axis so that all of the faces point inward
 	geo.scale( - 1, 1, 1 );
 
-	const texture = new THREE.TextureLoader().load( "./img/img1.jpg" );
-	const mat = new THREE.MeshBasicMaterial( { map: texture } );
+	ambmap = new THREE.TextureLoader().load( "./img/img1.jpg" );
+	const mat = new THREE.MeshBasicMaterial( { map: ambmap } );
 
 	const mesh = new THREE.Mesh( geo, mat );
 
@@ -518,7 +532,6 @@ function animate() {
 	update_camera();
 
 }
-
 
 function resize(renderer) {
   const canvas = renderer.domElement;
