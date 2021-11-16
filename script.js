@@ -1,147 +1,338 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
-camera.position.set(8, 13, 25);
-var renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
-var canvas = renderer.domElement;
-document.body.appendChild(canvas);
 
-var controls = new THREE.OrbitControls(camera, renderer.domElement);
+console.log("Script Loaded");
+let scene, camera, renderer, canvas,controls;
+let geometry, material, carro,points;
+let clock,time;
+let dirLight, spotLight;
+let dirLightShadowMapViewer, spotLightShadowMapViewer;
+let guia;
+	
+const state = {
+	shadow: {
+		blur: 3.5,
+		darkness: 1,
+		opacity: 1,
+	},
+	plane: {
+		color: '#ffffff',
+		opacity: 1,
+	},
+	showWireframe: false,
+};
 
-scene.add(new THREE.GridHelper(20, 40));
-/*
-var curve = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( -10, 0, 0 ),
-	new THREE.Vector3( -5, 15, 2 ),
-	new THREE.Vector3( 20, 15, 3 ),
-	new THREE.Vector3( 10, 0, 0 )
-);
+init();
+animate();
 
-var points = curve.getPoints( 50 );*/
-
-const c1 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( 0, 5, 15 ),
-	new THREE.Vector3( 0, 5, 5 ),
-	new THREE.Vector3( 0, 20, 5 ),
-	new THREE.Vector3( 0, 20, 0 )
-);
-
-//points.add(curve1.getPoint(100));
-var p1 = c1.getPoints(100);
-console.log(p1);
-
-const c2 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( 0, 20, 0 ),
-	new THREE.Vector3( 0, 20, -5 ),
-	new THREE.Vector3( 0, 7.5, -5 ),
-	new THREE.Vector3( 0, 7.5, -10)
-);
-const p2 = c2.getPoints(100);
-var points = p1.concat(p2);
-
-const c3 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( 0, 7.5, -10 ),
-	new THREE.Vector3( 0, 7.5, -12.5 ),
-	new THREE.Vector3( 0, 11, -12.5 ),
-	new THREE.Vector3( 0, 11, -15)
-);
-const p3 = c3.getPoints(100);
-var points = points.concat(p3);
-
-const c4 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( 0, 11, -15),
-	new THREE.Vector3( 0, 11, -17.5),
-	new THREE.Vector3( 0, 7.5, -17.5 ),
-	new THREE.Vector3( 0, 7.5, -20)
-);
-const p4 = c4.getPoints(100);
-var points = points.concat(p4);
-
-const c5 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( 0, 7.5, -20),
-	new THREE.Vector3( 0, 7.5, -22.5),
-	new THREE.Vector3( 0, 10, -25 ),
-	new THREE.Vector3( -3, 12.5, -27.5)
-);
-const p5 = c5.getPoints(100);
-var points = points.concat(p5);
-
-const c6 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( -3, 12.5, -27.5),
-	new THREE.Vector3( -6, 15, -30),
-	new THREE.Vector3( -16, 15, -30 ),
-	new THREE.Vector3( -19, 12.5, -27.5)
-);
-const p6 = c6.getPoints(100);
-var points = points.concat(p6);
-
-const c7 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( -19, 12.5, -27.5),
-	new THREE.Vector3( -22, 10, -25),
-	new THREE.Vector3( -22, 7.5, -17.5 ),
-	new THREE.Vector3( -22, 7.5, -12.5)
-);
-const p7 = c7.getPoints(100);
-var points = points.concat(p7);
-
-const c8 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( -22, 7.5, -12.5),
-	new THREE.Vector3( -22, 7.5, -7.5),
-	new THREE.Vector3( -22, 12.5, -5 ),
-	new THREE.Vector3( -22, 12.5, -2.5)
-);
-const p8 = c8.getPoints(100);
-var points = points.concat(p8);
-
-const c9 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( -22, 12.5, -2.5),
-	new THREE.Vector3( -22, 12.5, 0),
-	new THREE.Vector3( -22, 7.5, 2.5 ),
-	new THREE.Vector3( -22, 7.5, 10)
-);
-const p9 = c9.getPoints(100);
-var points = points.concat(p9);
-
-const c10 = new THREE.CubicBezierCurve3(
-	new THREE.Vector3( -22, 7.5, 10),
-	new THREE.Vector3( -22, 7.5, 17.5),
-	new THREE.Vector3( 0, 5, 25 ),
-	new THREE.Vector3( 0, 5, 15)
-);
-const p10 = c10.getPoints(100);
-var points = points.concat(p10);
-
-const geometry = new THREE.BufferGeometry().setFromPoints( points );
-
-const material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-
-// Create the final object to add to the scene
-const curveObject = new THREE.Line( geometry, material );
-scene.add(curveObject);
-
-// Ball
-const geo = new THREE.SphereGeometry(0.5, 20, 32); // (radius, widthSegments, heightSegments)
-const material2 = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-const sphere = new THREE.Mesh(geo, material2);
-scene.add(sphere);
-
-
-
-
-var clock = new THREE.Clock();
-var time = 0;
-//Carrinho
-
-
-function update_ball() {
-  sphere.position.x = points[Math.trunc(time)].getComponent(0);
-  sphere.position.y = points[Math.trunc(time)].getComponent(1);
-  sphere.position.z = points[Math.trunc(time)].getComponent(2);
+function init(){
+	initScene();
+	initMisc();
+	//initShadowMapViewers()
+	//initGUI();
 }
 
+function initGUI(){
+	guia = new GUI();
+				const shadowFolder = guia.addFolder( 'shadow' );
+				shadowFolder.open();
+				const planeFolder = guia.addFolder( 'plane' );
+				planeFolder.open();
 
-render();
+				/*
+				shadowFolder.add( state.shadow, 'blur', 0, 15, 0.1 );
+				shadowFolder.add( state.shadow, 'darkness', 1, 5, 0.1 ).onChange( function () {
+
+					carro.userData.darkness.value = state.shadow.darkness;
+
+				} );
+				shadowFolder.add( state.shadow, 'opacity', 0, 1, 0.01 ).onChange( function () {
+
+					ground.material.opacity = state.shadow.opacity;
+
+				} );*/
+				
+
+				/*gui.add( state, 'showWireframe', true ).onChange( function () {
+
+					if ( state.showWireframe ) {
+
+						scene.add( cameraHelper );
+
+					} else {
+
+						scene.remove( cameraHelper );
+
+					}
+
+				} );*/
+}
+
+function initScene() {
+	scene = new THREE.Scene();
+	camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
+	camera.position.set(8, 13, 25);
+	renderer = new THREE.WebGLRenderer({
+	antialias: true
+	});
+	renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.BasicShadowMap;
+	canvas = renderer.domElement;
+	document.body.appendChild(canvas);
+
+	//scene.add( new THREE.AmbientLight( 0x404040 ) );
+	//grid();
+	rollercoaster();
+	car();
+	envmap();
+	ground();
+	lights();
+
+}
+
+function initMisc(){
+	clock = new THREE.Clock();
+	time = 0;	
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+}
+
+function grid(){
+
+	scene.add(new THREE.GridHelper(100, 40));
+
+}
+
+function ground(){
+	geometry = new THREE.BoxGeometry( 10, 0.15, 10 );
+	material = new THREE.MeshPhongMaterial( {
+		color: 0xa0adaf,
+		shininess: 150,
+		specular: 0x111111
+	} );
+
+	const ground = new THREE.Mesh( geometry, material );
+	ground.scale.multiplyScalar( 10 );
+	ground.position.set( -10, -1, -5 );
+	ground.castShadow = false;
+	ground.receiveShadow = true;
+	scene.add( ground );
+}
+
+function rollercoaster(){
+		/*
+	var curve = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( -10, 0, 0 ),
+		new THREE.Vector3( -5, 15, 2 ),
+		new THREE.Vector3( 20, 15, 3 ),
+		new THREE.Vector3( 10, 0, 0 )
+	);
+
+	var points = curve.getPoints( 50 );*/
+
+	const c1 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( 0, 5, 15 ),
+		new THREE.Vector3( 0, 5, 5 ),
+		new THREE.Vector3( 0, 20, 5 ),
+		new THREE.Vector3( 0, 20, 0 )
+	);
+
+	//points.add(curve1.getPoint(100));
+	var p1 = c1.getPoints(100);
+	//console.log(p1);
+
+	const c2 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( 0, 20, 0 ),
+		new THREE.Vector3( 0, 20, -5 ),
+		new THREE.Vector3( 0, 7.5, -5 ),
+		new THREE.Vector3( 0, 7.5, -10)
+	);
+	const p2 = c2.getPoints(100);
+	points = p1.concat(p2);
+
+	const c3 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( 0, 7.5, -10 ),
+		new THREE.Vector3( 0, 7.5, -12.5 ),
+		new THREE.Vector3( 0, 11, -12.5 ),
+		new THREE.Vector3( 0, 11, -15)
+	);
+	const p3 = c3.getPoints(100);
+	points = points.concat(p3);
+
+	const c4 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( 0, 11, -15),
+		new THREE.Vector3( 0, 11, -17.5),
+		new THREE.Vector3( 0, 7.5, -17.5 ),
+		new THREE.Vector3( 0, 7.5, -20)
+	);
+	const p4 = c4.getPoints(100);
+	points = points.concat(p4);
+
+	const c5 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( 0, 7.5, -20),
+		new THREE.Vector3( 0, 7.5, -22.5),
+		new THREE.Vector3( 0, 10, -25 ),
+		new THREE.Vector3( -3, 12.5, -27.5)
+	);
+	const p5 = c5.getPoints(100);
+	points = points.concat(p5);
+
+	const c6 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( -3, 12.5, -27.5),
+		new THREE.Vector3( -6, 15, -30),
+		new THREE.Vector3( -16, 15, -30 ),
+		new THREE.Vector3( -19, 12.5, -27.5)
+	);
+	const p6 = c6.getPoints(100);
+	points = points.concat(p6);
+
+	const c7 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( -19, 12.5, -27.5),
+		new THREE.Vector3( -22, 10, -25),
+		new THREE.Vector3( -22, 7.5, -17.5 ),
+		new THREE.Vector3( -22, 7.5, -12.5)
+	);
+	const p7 = c7.getPoints(100);
+	points = points.concat(p7);
+
+	const c8 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( -22, 7.5, -12.5),
+		new THREE.Vector3( -22, 7.5, -7.5),
+		new THREE.Vector3( -22, 12.5, -5 ),
+		new THREE.Vector3( -22, 12.5, -2.5)
+	);
+	const p8 = c8.getPoints(100);
+	points = points.concat(p8);
+
+	const c9 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( -22, 12.5, -2.5),
+		new THREE.Vector3( -22, 12.5, 0),
+		new THREE.Vector3( -22, 7.5, 2.5 ),
+		new THREE.Vector3( -22, 7.5, 10)
+	);
+	const p9 = c9.getPoints(100);
+	points = points.concat(p9);
+
+	const c10 = new THREE.CubicBezierCurve3(
+		new THREE.Vector3( -22, 7.5, 10),
+		new THREE.Vector3( -22, 7.5, 17.5),
+		new THREE.Vector3( 0, 5, 25 ),
+		new THREE.Vector3( 0, 5, 15)
+	);
+	const p10 = c10.getPoints(100);
+	points = points.concat(p10);
+
+	geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+	material = new THREE.LineBasicMaterial( { 
+		color : 0xff0000,
+		linewidth: 100 
+	
+	} );
+
+	// Create the final object to add to the scene
+	const curveObject = new THREE.Line( geometry, material );
+	curveObject.castShadow = true;
+	curveObject.receiveShadow = true;
+	scene.add(curveObject);
+}
+
+function lights(){
+	 // Lights
+
+	 spotLight = new THREE.SpotLight( 0xffffff );
+	 spotLight.name = 'Spot Light';
+	 spotLight.angle = Math.PI / 5;
+	 spotLight.penumbra = 0.3;
+	 spotLight.position.set( 20, 100, 50 );
+	 spotLight.castShadow = true;
+	 spotLight.shadow.camera.near = 8;
+	 spotLight.shadow.camera.far = 150;
+	 spotLight.shadow.mapSize.width = 1024;
+	 spotLight.shadow.mapSize.height = 1024;
+	 scene.add( spotLight );
+
+	 scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
+
+	 dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+	 dirLight.name = 'Dir. Light';
+	 dirLight.position.set( 20, 50, 20 );
+	 dirLight.castShadow = true;
+	 dirLight.shadow.camera.near = 1;
+	 dirLight.shadow.camera.far = 100;
+	 dirLight.shadow.camera.right = 15;
+	 dirLight.shadow.camera.left = - 10;
+	 dirLight.shadow.camera.top	= 15;
+	 dirLight.shadow.camera.bottom = - 15;
+	 dirLight.shadow.mapSize.width = 2048;
+	 dirLight.shadow.mapSize.height = 2048;
+	 //scene.add( dirLight );
+
+	 //scene.add( new THREE.CameraHelper( dirLight.shadow.camera ) );
+
+}
+
+function initShadowMapViewers() {
+
+	dirLightShadowMapViewer = new ShadowMapViewer( dirLight );
+	spotLightShadowMapViewer = new ShadowMapViewer( spotLight );
+	resizeShadowMapViewers();
+	}
+
+function resizeShadowMapViewers() {
+
+	const size = window.innerWidth * 0.15;
+
+	dirLightShadowMapViewer.position.x = 10;
+	dirLightShadowMapViewer.position.y = 10;
+	dirLightShadowMapViewer.size.width = size;
+	dirLightShadowMapViewer.size.height = size;
+	dirLightShadowMapViewer.update(); //Required when setting position or size directly
+
+	spotLightShadowMapViewer.size.set( size, size );
+	spotLightShadowMapViewer.position.set( size + 20, 10 );
+	// spotLightShadowMapViewer.update();	//NOT required because .set updates automatically
+
+}
+
+function car(){
+	// Ball
+	geometry = new THREE.SphereGeometry(2, 20, 32); // (radius, widthSegments, heightSegments)
+	material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+	carro = new THREE.Mesh(geometry, material);
+	carro.castShadow = true;
+	carro.receiveShadow = true;
+	scene.add(carro);
+}
+
+function update_car() {
+	let speed = 150;
+	let valor = Math.trunc(time*speed)%1000;
+	carro.position.x = points[valor].getComponent(0);
+	carro.position.y = points[valor].getComponent(1);
+	carro.position.z = points[valor].getComponent(2);
+}
+
+function envmap(){
+	//envmap
+	const geo = new THREE.SphereGeometry( 500, 60, 40 );
+	// invert the geometry on the x-axis so that all of the faces point inward
+	geo.scale( - 1, 1, 1 );
+
+	const texture = new THREE.TextureLoader().load( 'img/img1.jpg' );
+	const mat = new THREE.MeshBasicMaterial( { map: texture } );
+
+	const mesh = new THREE.Mesh( geo, mat );
+
+	scene.add( mesh );
+}
+
+function animate() {
+
+	requestAnimationFrame( animate );
+	render();
+	time += clock.getDelta();
+	update_car();
+
+}
+
 
 function resize(renderer) {
   const canvas = renderer.domElement;
@@ -154,18 +345,13 @@ function resize(renderer) {
   return needResize;
 }
 
-
-
 function render() {
   if (resize(renderer)) {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
   }
   renderer.render(scene, camera);
-
-  time += clock.getDelta();
   //console.log(time);
-  update_ball();
 
   //curve.points[1].y = Math.sin(time) * 2.5;
 
@@ -173,7 +359,4 @@ function render() {
 
   //curveObject.geometry.dispose();
   //curveObject.geometry = geometry;
-
-
-  requestAnimationFrame(render);
 }
